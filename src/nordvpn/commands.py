@@ -35,10 +35,5 @@ def nordvpn_connect(place: str) -> subprocess.CompletedProcess:
     return nordvpn_command(["connect", place])
 
 
-
-if __name__ == "__main__":
-    completed = nordvpn_login()
-    print(completed.stdout)
-    print(completed.stderr)
-    print(completed.returncode)
-    print("done")
+def nordvpn_disconnect() -> subprocess.CompletedProcess:
+    return nordvpn_command(["disconnect"])
