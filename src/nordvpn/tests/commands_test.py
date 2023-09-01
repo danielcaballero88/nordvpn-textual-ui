@@ -37,3 +37,31 @@ class CommandsTests(unittest.TestCase):
             expected_output = b'\r-\r  \r\r-\r  \rYou are not logged in.\n'
             assert completed_process.stdout == expected_output
             assert completed_process.returncode == 1
+
+    def test_nordvpn_login(self):
+        """Test the nordvpn_account command mock."""
+        with patch(
+            "src.nordvpn.commands.nordvpn_login",
+            mock_commands.mock_nordvpn_login(logged_in=True)
+        ):
+            completed_process = commands.nordvpn_login()
+            expected_output = (
+                b'\r-\r  \r\r-\r  \r\r-\r\\\r|\r  \rContinue in the browser: '
+                b'https://api.nordvpn.com/v1/users/oauth/login-redirect?attempt=mock-uuid\n'
+                b'\r\r'
+            )
+            assert completed_process.stdout == expected_output
+            assert completed_process.returncode == 0
+
+        with patch(
+            "src.nordvpn.commands.nordvpn_login",
+            mock_commands.mock_nordvpn_login(logged_in=False)
+        ):
+            completed_process = commands.nordvpn_login()
+            expected_output = (
+                b'\r-\r  \r\r-\r  \r\r-\r\\\r|\r  \rContinue in the browser: '
+                b'https://api.nordvpn.com/v1/users/oauth/login-redirect?attempt=mock-uuid\n'
+                b'\r\r'
+            )
+            assert completed_process.stdout == expected_output
+            assert completed_process.returncode == 0

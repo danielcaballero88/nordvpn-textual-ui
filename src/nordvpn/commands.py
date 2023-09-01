@@ -33,3 +33,12 @@ def nordvpn_cities(country: str) -> subprocess.CompletedProcess:
 
 def nordvpn_connect(place: str) -> subprocess.CompletedProcess:
     return nordvpn_command(["connect", place])
+
+
+
+if __name__ == "__main__":
+    completed = nordvpn_login()
+    print(completed.stdout)
+    print(completed.stderr)
+    print(completed.returncode)
+    print("done")
