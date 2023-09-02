@@ -6,7 +6,7 @@ import re
 from . import commands
 
 
-def check_account():
+def check_account() -> dict[str, str]:
     """Run nordvpn account.
 
     This function is used to check if it is currently logged in by the wrapper function
