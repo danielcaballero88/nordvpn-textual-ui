@@ -14,16 +14,17 @@ class CommandsTests(unittest.TestCase):
     By replacing each of these functions with a mock, nothing is really being tested
     there, but it's just a way to test the mocks in a very basic way.
     """
+
     def test_nordvpn_account(self):
         """Test the nordvpn_account command mock."""
         with patch(
             "src.nordvpn.commands.nordvpn_account",
-            mock_commands.get_mock_nordvpn_account(logged_in=True)
+            mock_commands.get_mock_nordvpn_account(logged_in=True),
         ):
             completed_process = commands.nordvpn_account()
             expected_output = (
                 b"\r-\r  \r\r-\r\\\r|\r/\r  \rAccount Information:\n"
-                b"Email Address: danielcaballero88@gmail.com\n"
+                b"Email Address: mock@mail.com\n"
                 b"VPN Service: Active (Expires on Jul 15th, 2025)\n"
             )
             assert completed_process.stdout == expected_output
@@ -31,10 +32,10 @@ class CommandsTests(unittest.TestCase):
 
         with patch(
             "src.nordvpn.commands.nordvpn_account",
-            mock_commands.get_mock_nordvpn_account(logged_in=False)
+            mock_commands.get_mock_nordvpn_account(logged_in=False),
         ):
             completed_process = commands.nordvpn_account()
-            expected_output = b'\r-\r  \r\r-\r  \rYou are not logged in.\n'
+            expected_output = b"\r-\r  \r\r-\r  \rYou are not logged in.\n"
             assert completed_process.stdout == expected_output
             assert completed_process.returncode == 1
 
@@ -42,26 +43,22 @@ class CommandsTests(unittest.TestCase):
         """Test the nordvpn_account command mock."""
         with patch(
             "src.nordvpn.commands.nordvpn_login",
-            mock_commands.get_mock_nordvpn_login(logged_in=True)
+            mock_commands.get_mock_nordvpn_login(logged_in=True),
         ):
             completed_process = commands.nordvpn_login()
-            expected_output = (
-                b'\r-\r  \r\r-\r  \r\r-\r\\\r|\r  \rContinue in the browser: '
-                b'https://api.nordvpn.com/v1/users/oauth/login-redirect?attempt=mock-uuid\n'
-                b'\r\r'
-            )
+            expected_output = b"\r-\r  \r\r-\r  \rYou are already logged in.\n"
             assert completed_process.stdout == expected_output
-            assert completed_process.returncode == 0
+            assert completed_process.returncode == 1
 
         with patch(
             "src.nordvpn.commands.nordvpn_login",
-            mock_commands.get_mock_nordvpn_login(logged_in=False)
+            mock_commands.get_mock_nordvpn_login(logged_in=False),
         ):
             completed_process = commands.nordvpn_login()
             expected_output = (
-                b'\r-\r  \r\r-\r  \r\r-\r\\\r|\r  \rContinue in the browser: '
-                b'https://api.nordvpn.com/v1/users/oauth/login-redirect?attempt=mock-uuid\n'
-                b'\r\r'
+                b"\r-\r  \r\r-\r  \r\r-\r\\\r|\r  \rContinue in the browser: "
+                b"https://api.nordvpn.com/v1/users/oauth/login-redirect?attempt=mock-uuid\n"
+                b"\r\r"
             )
             assert completed_process.stdout == expected_output
             assert completed_process.returncode == 0
