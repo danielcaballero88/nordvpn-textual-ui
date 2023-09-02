@@ -106,6 +106,7 @@ def run_logout():
     print(result)
 
 
+@logout_required
 def run_login():
     if is_logged_in():
         return
