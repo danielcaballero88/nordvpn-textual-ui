@@ -45,7 +45,12 @@ def get_mock_nordvpn_account(logged_in: bool):
             b"VPN Service: Active (Expires on Jul 15th, 2025)\n"
         ),
         returncode_logged_in=0,
-        output_logged_out=(b"\r-\r  \r\r-\r  \r" b"You are not logged in.\n"),
+        # fmt: off
+        output_logged_out=(
+            b"\r-\r  \r\r-\r  \r"
+            b"You are not logged in.\n"
+        ),
+        # fmt: on
         returncode_logged_out=1,
         logged_in=logged_in,
     )
@@ -54,7 +59,12 @@ def get_mock_nordvpn_account(logged_in: bool):
 def get_mock_nordvpn_login(logged_in: bool):
     """Mock commands.nordvpn_login."""
     return get_mock_nordvpn_generic(
-        output_logged_in=(b"\r-\r  \r\r-\r  \r" b"You are already logged in.\n"),
+        # fmt: off
+        output_logged_in=(
+            b"\r-\r  \r\r-\r  \r"
+            b"You are already logged in.\n"
+        ),
+        # fmt: on
         returncode_logged_in=1,
         output_logged_out=(
             b"\r-\r  \r\r-\r  \r\r-\r\\\r|\r  \r"
@@ -70,11 +80,17 @@ def get_mock_nordvpn_login(logged_in: bool):
 def get_mock_nordvpn_logout(logged_in: bool):
     """Mock commands.nordvpn_logout."""
     return get_mock_nordvpn_generic(
+        # fmt: off
         output_logged_in=(
-            b"\r-\r  \r\r-\r\\\r|\r/\r-\r\\\r|\r/\r  \r" b"You are logged out.\n"
+            b"\r-\r  \r\r-\r\\\r|\r/\r-\r\\\r|\r/\r  \r"
+            b"You are logged out.\n"
         ),
         returncode_logged_in=0,
-        output_logged_out=(b"\r-\r  \r\r-\r  \r" b"You are not logged in.\n"),
+        output_logged_out=(
+            b"\r-\r  \r\r-\r  \r"
+            b"You are not logged in.\n"
+        ),
+        # fmt: on
         returncode_logged_out=1,
         logged_in=logged_in,
     )
@@ -105,9 +121,17 @@ def get_mock_nordvpn_status(logged_in: bool, connected: bool):
         )
     else:  # disconnected
         return get_mock_nordvpn_generic(
-            output_logged_in=(b"\r-\r  \r\r-\r  \r" b"Status: Disconnected\n"),
+            # fmt: off
+            output_logged_in=(
+                b"\r-\r  \r\r-\r  \r"
+                b"Status: Disconnected\n"
+            ),
             returncode_logged_in=0,
-            output_logged_out=(b"\r-\r  \r\r-\r  \r" b"Status: Disconnected\n"),
+            output_logged_out=(
+                b"\r-\r  \r\r-\r  \r"
+                b"Status: Disconnected\n"
+            ),
+            # fmt: on
             returncode_logged_out=0,
             logged_in=logged_in,
         )
@@ -140,7 +164,12 @@ def get_mock_nordvpn_countries(logged_in: bool):
 
 def get_mock_nordvpn_cities(logged_in: bool):
     """Mock commands.nordvpn_cities for a made up country."""
-    output = b"\r-\r  \r\r-\r  \r" b"Mock_City_1\t\tMock_City_2\n"
+    # fmt: off
+    output = (
+        b"\r-\r  \r\r-\r  \r"
+        b"Mock_City_1\t\tMock_City_2\n"
+    )
+    # fmt: on
     return get_mock_nordvpn_generic(
         output_logged_in=output,
         returncode_logged_in=0,
@@ -162,7 +191,12 @@ def get_mock_nordvpn_connect(logged_in: bool):
             b"\r-\r  \r"
         ),
         returncode_logged_in=0,
-        output_logged_out=(b"\r-\r  \r\r-\r  \r" b"You are not logged in.\n"),
+        # fmt: off
+        output_logged_out=(
+            b"\r-\r  \r\r-\r  \r"
+            b"You are not logged in.\n"
+        ),
+        # fmt: on
         returncode_logged_out=1,
         logged_in=logged_in,
     )
@@ -179,9 +213,12 @@ def get_mock_nordvpn_disconnect(logged_in: bool):
             b"\r\r"
         ),
         returncode_logged_in=0,
+        # fmt: off
         output_logged_out=(
-            b"\r-\r  \r\r-\r  \r" b"You are not connected to NordVPN.\n\r\r"
+            b"\r-\r  \r\r-\r  \r"
+            b"You are not connected to NordVPN.\n\r\r"
         ),
+        # fmt: on
         returncode_logged_out=0,
         logged_in=logged_in,
     )
