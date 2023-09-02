@@ -48,6 +48,16 @@ class UtilsTestsLoggedIn(unittest.TestCase):
         output = utils.run_logout()
         assert "you are logged out" in output.lower()
 
+    @mock.patch.multiple(
+        "src.nordvpn.commands",
+        nordvpn_account=mock_commands.get_mock_nordvpn_account(logged_in=True),
+        nordvpn_login=mock_commands.get_mock_nordvpn_login(logged_in=True),
+    )
+    def test_run_login(self):
+        """Test the utils.run_login function."""
+        with self.assertRaises(utils.NotLoggedOutError):
+            utils.run_login()
+
 
 # Mock the nordvpn_command method to ensure that no actual nordvpn shell
 # command is called during tests in case of a mistake while development.
@@ -83,3 +93,13 @@ class UtilsTestsLoggedOut(unittest.TestCase):
         """Test the utils.run_logout function."""
         with self.assertRaises(utils.NotLoggedInError):
             utils.run_logout()
+
+    @mock.patch.multiple(
+        "src.nordvpn.commands",
+        nordvpn_account=mock_commands.get_mock_nordvpn_account(logged_in=False),
+        nordvpn_login=mock_commands.get_mock_nordvpn_login(logged_in=False),
+    )
+    def test_run_login(self):
+        """Test the utils.run_login function."""
+        output = utils.run_login()
+        assert "continue in the browser" in output.lower()

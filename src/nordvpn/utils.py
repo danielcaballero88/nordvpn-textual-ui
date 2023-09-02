@@ -55,6 +55,10 @@ class NotLoggedInError(Exception):
     ...
 
 
+class NotLoggedOutError(Exception):
+    ...
+
+
 def is_logged_in() -> bool:
     try:
         check_account()
@@ -90,7 +94,7 @@ def logout_required(func):
         # Check for logged in status.
         if is_logged_in():
             msg = f"function {func.__name__} requires to be logged out."
-            raise NotLoggedInError(msg)
+            raise NotLoggedOutError(msg)
         # Execute function.
         func_result = func(*args, **kwargs)
         # Done.
@@ -110,12 +114,11 @@ def run_logout() -> str:
 
 @logout_required
 def run_login():
-    if is_logged_in():
-        return
     completed = commands.nordvpn_login()
-    print(completed.returncode)
-    result = completed.stdout.decode("utf-8")
-    print(result)
+    if completed.returncode != 0:
+        raise ValueError(f"nordvpn_login returned ccode {completed.returncode}")
+    output = completed.stdout.decode("utf-8")
+    return output
 
 
 @login_required
