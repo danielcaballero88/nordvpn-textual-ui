@@ -17,23 +17,38 @@ mock_nordvpn_command.side_effect = ValueError(
 class UtilsTestsLoggedInAndConnected(unittest.TestCase):
     """Tests for the nordvpn.utils module."""
 
-    @mock.patch(
-        "src.nordvpn.commands.nordvpn_account",
-        mock_commands.get_mock_nordvpn_account(logged_in=True),
-    )
-    def test_check_account_if_logged_in(self):
-        """Test the check_account method when logged in."""
-        result = utils.check_account()
+    def test_check_account(self):
+        """Test the utils.check_account method."""
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_account",
+            mock_commands.get_mock_nordvpn_account(logged_in=True),
+        ):
+            result = utils.check_account()
+            assert isinstance(result, dict)
+            assert result.get("email") == "mock@mail.com"
+            assert result.get("expiration") == "Expires on Jul 15th, 2025"
 
-        assert isinstance(result, dict)
-        assert result.get("email") == "mock@mail.com"
-        assert result.get("expiration") == "Expires on Jul 15th, 2025"
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_account",
+            mock_commands.get_mock_nordvpn_account(logged_in=False),
+        ):
+            with self.assertRaises(utils.NotLoggedInError):
+                utils.check_account()
 
-    @mock.patch(
-        "src.nordvpn.commands.nordvpn_account",
-        mock_commands.get_mock_nordvpn_account(logged_in=False),
-    )
-    def test_check_account_if_logged_out(self):
-        """Test the check_account method when logged in."""
-        with self.assertRaises(utils.NotLoggedInError):
-            utils.check_account()
+    def test_is_logged_in_if_logged_in(self):
+        """Test the utils.is_logged_in method."""
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_account",
+            mock_commands.get_mock_nordvpn_account(logged_in=True),
+        ):
+            is_logged_in = utils.is_logged_in()
+            assert isinstance(is_logged_in, bool)
+            assert is_logged_in
+
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_account",
+            mock_commands.get_mock_nordvpn_account(logged_in=False),
+        ):
+            is_logged_in = utils.is_logged_in()
+            assert isinstance(is_logged_in, bool)
+            assert not is_logged_in
