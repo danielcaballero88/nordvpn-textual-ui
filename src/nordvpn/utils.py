@@ -58,7 +58,8 @@ class NotLoggedInError(Exception):
 def is_logged_in() -> bool:
     try:
         check_account()
-    except:
+    except Exception as exc:
+        print(exc)
         return False
     else:
         return True
@@ -99,11 +100,12 @@ def logout_required(func):
 
 
 @login_required
-def run_logout():
+def run_logout() -> str:
     completed = commands.nordvpn_logout()
-    print(completed.returncode)
-    result = completed.stdout.decode("utf-8")
-    print(result)
+    if completed.returncode != 0:
+        raise ValueError(f"nordvpn_logout returned code {completed.returncode}")
+    output = completed.stdout.decode("utf-8")
+    return output
 
 
 @logout_required
