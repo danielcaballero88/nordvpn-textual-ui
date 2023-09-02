@@ -1,7 +1,7 @@
 # pylint: disable-all
 # flake8: noqa
-import re
 import functools
+import re
 
 from . import commands
 
@@ -13,6 +13,11 @@ def check_account():
     is_logged_in, so do not require being logged in within this one or there will be an
     infinite recursion.
     """
+    # Initialize result
+    result = {
+        "email": None,
+        "expiration": None,
+    }
     completed = commands.nordvpn_account()
     output = completed.stdout.decode("utf-8").replace("\r", "")
     if "not logged in" in output:
@@ -39,14 +44,11 @@ def check_account():
     lines = output.split("\n")
     for line in lines:
         if _email := _extract_email(line):
-            email = _email
+            result["email"] = _email
         if _expiration := _extract_expiration(line):
-            expiration = _expiration
+            result["expiration"] = _expiration
 
-    return {
-        "email": email,
-        "expiration": expiration,
-    }
+    return result
 
 
 class NotLoggedInError(Exception):
