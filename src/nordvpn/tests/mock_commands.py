@@ -6,9 +6,11 @@ from unittest import mock
 class MockCompletedProcess:
     """Mock the subprocess.CompletedProcess class."""
 
-    def __init__(self, stdout: bytes, returncode: int):
+    def __init__(self, stdout: bytes, returncode: int, *args, **kwargs):
         self.stdout = stdout
         self.returncode = returncode
+        self.args = args
+        self.kwargs = kwargs
 
 
 mock_nordvpn_command = mock.MagicMock()
@@ -24,11 +26,15 @@ def get_mock_nordvpn_generic(
 ) -> Callable[..., MockCompletedProcess]:
     """Generic mock for the nordvpn commands."""
 
-    def _mock_nordvpn_generic_logged_in(*_args, **_kwargs) -> MockCompletedProcess:
-        return MockCompletedProcess(output_logged_in, returncode_logged_in)
+    def _mock_nordvpn_generic_logged_in(*args, **kwargs) -> MockCompletedProcess:
+        return MockCompletedProcess(
+            output_logged_in, returncode_logged_in, *args, **kwargs
+        )
 
-    def _mock_nordvpn_generic_not_logged_in(*_args, **_kwargs) -> MockCompletedProcess:
-        return MockCompletedProcess(output_logged_out, returncode_logged_out)
+    def _mock_nordvpn_generic_not_logged_in(*args, **kwargs) -> MockCompletedProcess:
+        return MockCompletedProcess(
+            output_logged_out, returncode_logged_out, *args, **kwargs
+        )
 
     if logged_in:
         return _mock_nordvpn_generic_logged_in

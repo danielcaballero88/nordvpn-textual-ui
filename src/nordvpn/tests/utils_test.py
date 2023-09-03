@@ -152,15 +152,19 @@ class UtilsTestsLoggedIn(unittest.TestCase):
             "Ukraine",
         ]
 
-    @mock.patch(
-        "src.nordvpn.commands.nordvpn_cities",
-        mock_commands.get_mock_nordvpn_cities(logged_in=True),
-    )
     def test_get_cities(self):
         """Test the utils.get_cities function."""
-        cities = utils.get_cities("Some_Country")
-        assert isinstance(cities, list)
-        assert cities == ["Mock_City_1", "Mock_City_2"]
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_cities",
+        ) as mock_nordvpn_cities:
+            mock_nordvpn_cities.return_value = mock_commands.get_mock_nordvpn_cities(
+                logged_in=True
+            )()
+            cities = utils.get_cities("Some_Country")
+
+            mock_nordvpn_cities.assert_called_with("Some_Country")
+            assert isinstance(cities, list)
+            assert cities == ["Mock_City_1", "Mock_City_2"]
 
 
 # Mock the nordvpn_command method to ensure that no actual nordvpn shell
