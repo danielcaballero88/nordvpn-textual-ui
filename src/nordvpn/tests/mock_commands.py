@@ -1,4 +1,5 @@
 """Mocks for the commands module."""
+from typing import Callable
 from unittest import mock
 
 
@@ -20,13 +21,13 @@ def get_mock_nordvpn_generic(
     output_logged_out: bytes,
     returncode_logged_out: int,
     logged_in: bool,
-) -> MockCompletedProcess:
+) -> Callable[..., MockCompletedProcess]:
     """Generic mock for the nordvpn commands."""
 
-    def _mock_nordvpn_generic_logged_in(*_args, **_kwargs):
+    def _mock_nordvpn_generic_logged_in(*_args, **_kwargs) -> MockCompletedProcess:
         return MockCompletedProcess(output_logged_in, returncode_logged_in)
 
-    def _mock_nordvpn_generic_not_logged_in(*_args, **_kwargs):
+    def _mock_nordvpn_generic_not_logged_in(*_args, **_kwargs) -> MockCompletedProcess:
         return MockCompletedProcess(output_logged_out, returncode_logged_out)
 
     if logged_in:
