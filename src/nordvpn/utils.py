@@ -181,6 +181,14 @@ def connect_to_location(location: str) -> str:
     return output
 
 
+@login_required
+def disconnect_from_nordvpn() -> str:
+    completed = commands.nordvpn_disconnect()
+    output: str = completed.stdout.decode("utf-8")
+    output = output.replace("\r", "")
+    return output
+
+
 if __name__ == "__main__":
     # run_login()
     get_status()

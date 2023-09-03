@@ -177,6 +177,16 @@ class UtilsTestsLoggedIn(unittest.TestCase):
             assert isinstance(result, str)
             assert "you are connected to" in result.lower()
 
+    @mock.patch(
+        "src.nordvpn.commands.nordvpn_disconnect",
+        mock_commands.get_mock_nordvpn_disconnect(logged_in=True),
+    )
+    def test_disconnect_from_nordvpn(self):
+        """Test the utils.disconnect_from_nordvpn function."""
+        result = utils.disconnect_from_nordvpn()
+        assert isinstance(result, str)
+        assert "you are disconnected" in result.lower()
+
 
 # Mock the nordvpn_command method to ensure that no actual nordvpn shell
 # command is called during tests in case of a mistake while development.
@@ -259,3 +269,12 @@ class UtilsTestsLoggedOut(unittest.TestCase):
         """Test the utils.get_connect function."""
         with self.assertRaises(utils.NotLoggedInError):
             utils.connect_to_location("Some_Country")
+
+    @mock.patch(
+        "src.nordvpn.commands.nordvpn_disconnect",
+        mock_commands.get_mock_nordvpn_disconnect(logged_in=False),
+    )
+    def test_get_disconnect(self):
+        """Test the utils.get_disconnect function."""
+        with self.assertRaises(utils.NotLoggedInError):
+            utils.disconnect_from_nordvpn()
