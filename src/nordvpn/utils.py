@@ -174,10 +174,11 @@ def get_cities(country: str) -> list[str]:
 
 
 @login_required
-def connect_to_country(location: str):
+def connect_to_location(location: str) -> str:
     completed = commands.nordvpn_connect(location)
-    result = completed.stdout.decode("utf-8")
-    print(result)
+    output: str = completed.stdout.decode("utf-8")
+    output = output.replace("\r", "")
+    return output
 
 
 if __name__ == "__main__":
