@@ -1,5 +1,5 @@
 """Mocks for the commands module."""
-from unittest.mock import MagicMock
+from unittest import mock
 
 
 class MockCompletedProcess:
@@ -10,7 +10,7 @@ class MockCompletedProcess:
         self.returncode = returncode
 
 
-mock_nordvpn_command = MagicMock()
+mock_nordvpn_command = mock.MagicMock()
 mock_nordvpn_command.return_value = MockCompletedProcess(b"", 0)
 
 
@@ -99,8 +99,12 @@ def get_mock_nordvpn_logout(logged_in: bool):
 def get_mock_nordvpn_status(logged_in: bool, connected: bool):
     """Mock commands.nordvpn_status."""
     if connected:
-        if logged_in:
-            raise ValueError("Cannot be connected while logged out.")
+        if not logged_in:
+
+            def _raise_error():
+                raise ValueError("Cannot be connected while logged out.")
+
+            return mock.Mock(side_effect=_raise_error)
         return get_mock_nordvpn_generic(
             output_logged_in=(
                 b"\r-\r  \r\r-\r  \r"

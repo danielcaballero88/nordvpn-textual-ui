@@ -52,6 +52,36 @@ class UtilsTestsLoggedIn(unittest.TestCase):
         with self.assertRaises(utils.NotLoggedOutError):
             utils.run_login()
 
+    def test_get_status(self):
+        """Test the utils.get_status function."""
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_status",
+            mock_commands.get_mock_nordvpn_status(logged_in=True, connected=False),
+        ):
+            status = utils.get_status()
+            assert isinstance(status, dict)
+            assert status == {
+                "Status": "Disconnected",
+                "Country": None,
+                "City": None,
+                "IP": None,
+                "Uptime": None,
+            }
+
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_status",
+            mock_commands.get_mock_nordvpn_status(logged_in=True, connected=True),
+        ):
+            status = utils.get_status()
+            assert isinstance(status, dict)
+            assert status == {
+                "Status": "Connected",
+                "Country": "Mock_Country",
+                "City": "Mock_City",
+                "IP": "123.123.123.1",
+                "Uptime": "18 seconds",
+            }
+
 
 # Mock the nordvpn_command method to ensure that no actual nordvpn shell
 # command is called during tests in case of a mistake while development.
@@ -91,3 +121,19 @@ class UtilsTestsLoggedOut(unittest.TestCase):
         """Test the utils.run_login function."""
         output = utils.run_login()
         assert "continue in the browser" in output.lower()
+
+    def test_get_status(self):
+        """Test the utils.get_status function."""
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_status",
+            mock_commands.get_mock_nordvpn_status(logged_in=False, connected=False),
+        ):
+            with self.assertRaises(utils.NotLoggedInError):
+                utils.get_status()
+
+        with mock.patch(
+            "src.nordvpn.commands.nordvpn_status",
+            mock_commands.get_mock_nordvpn_status(logged_in=False, connected=True),
+        ):
+            with self.assertRaises(utils.NotLoggedInError):
+                utils.get_status()

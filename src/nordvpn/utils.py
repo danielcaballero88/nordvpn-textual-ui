@@ -123,14 +123,24 @@ def run_login():
 
 @login_required
 def get_status():
+    result = {
+        "Status": None,
+        "Country": None,
+        "City": None,
+        "IP": None,
+        "Uptime": None,
+    }
     completed = commands.nordvpn_status()
-    result = completed.stdout.decode("utf-8")
-    result = result.replace("\r", "")
-    lines = result.split("\n")
-    print(lines)
-    # re_match = re.search("Status:\s*(\w+?)$", result)
-    # if re_match:
-    #     print(re_match.groups()[0])
+    output = completed.stdout.decode("utf-8")
+    output = output.replace("\r", "")
+    lines = output.split("\n")
+    for line in lines:
+        re_match = re.search("(\w+?):\s*([\w\s.]+)$", line)
+        if re_match:
+            key, val = re_match.groups()
+            if key in result:
+                result[key] = val
+    return result
 
 
 @login_required
