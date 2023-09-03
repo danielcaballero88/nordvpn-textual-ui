@@ -1,9 +1,8 @@
-# pylint: disable-all
-# flake8: noqa
 import functools
 import re
 
-from . import commands
+from .commands.commands import commands
+from .exceptions import NotLoggedInError, NotLoggedOutError
 
 
 def check_account() -> dict[str, str]:
@@ -26,7 +25,7 @@ def check_account() -> dict[str, str]:
     def _extract_email(_line: str) -> str | None:
         if not _line.startswith("Email"):
             return None
-        re_match = re.search(":\s*(\w+?@\w+?\.com)", _line)
+        re_match = re.search(r":\s*(\w+?@\w+?\.com)", _line)
         if not re_match:
             raise ValueError("Couldn't extract email with regex.")
         email = re_match.groups()[0]
@@ -35,7 +34,7 @@ def check_account() -> dict[str, str]:
     def _extract_expiration(_line: str) -> str | None:
         if not _line.startswith("VPN Service"):
             return None
-        re_match = re.search("Active \((.+?)\)", _line)
+        re_match = re.search(r"Active \((.+?)\)", _line)
         if not re_match:
             raise ValueError("Couldn't extract expire date with regex.")
         expiration = re_match.groups()[0]
@@ -49,14 +48,6 @@ def check_account() -> dict[str, str]:
             result["expiration"] = _expiration
 
     return result
-
-
-class NotLoggedInError(Exception):
-    ...
-
-
-class NotLoggedOutError(Exception):
-    ...
 
 
 def is_logged_in() -> bool:
@@ -135,7 +126,7 @@ def get_status():
     output = output.replace("\r", "")
     lines = output.split("\n")
     for line in lines:
-        re_match = re.search("(\w+?):\s*([\w\s.]+)$", line)
+        re_match = re.search(r"(\w+?):\s*([\w\s.]+)$", line)
         if re_match:
             key, val = re_match.groups()
             if key in result:
@@ -152,13 +143,13 @@ def get_countries() -> list[str]:
     result = result.split(";")
     countries = []
     for country_raw in result:
-        re_match = re.search("(\w+)", country_raw)
+        re_match = re.search(r"(\w+)", country_raw)
         if re_match:
             countries.append(re_match.groups()[0])
     return countries
 
 
-@login_required
+# @login_required
 def get_cities(country: str) -> list[str]:
     completed = commands.nordvpn_cities(country)
     result = completed.stdout.decode("utf-8")
@@ -167,7 +158,7 @@ def get_cities(country: str) -> list[str]:
     result = result.split(";")
     cities = []
     for country_raw in result:
-        re_match = re.search("(\w+)", country_raw)
+        re_match = re.search(r"(\w+)", country_raw)
         if re_match:
             cities.append(re_match.groups()[0])
     return cities
