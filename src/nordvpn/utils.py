@@ -144,7 +144,7 @@ def get_status():
 
 
 @login_required
-def get_countries():
+def get_countries() -> list[str]:
     completed = commands.nordvpn_countries()
     result = completed.stdout.decode("utf-8")
     result = result.replace("\r", "").replace("\n", "\t")

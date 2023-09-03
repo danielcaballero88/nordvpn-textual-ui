@@ -82,6 +82,76 @@ class UtilsTestsLoggedIn(unittest.TestCase):
                 "Uptime": "18 seconds",
             }
 
+    @mock.patch(
+        "src.nordvpn.commands.nordvpn_countries",
+        mock_commands.get_mock_nordvpn_countries(logged_in=True),
+    )
+    def test_get_countries(self):
+        """Test the utils.get_countries function."""
+        countries = utils.get_countries()
+        assert isinstance(countries, list)
+        assert countries == [
+            "Albania",
+            "Bulgaria",
+            "Czech_Republic",
+            "Greece",
+            "Italy",
+            "Moldova",
+            "Romania",
+            "Spain",
+            "United_Kingdom",
+            "Argentina",
+            "Canada",
+            "Denmark",
+            "Hong_Kong",
+            "Japan",
+            "Netherlands",
+            "Serbia",
+            "Sweden",
+            "United_States",
+            "Australia",
+            "Chile",
+            "Estonia",
+            "Hungary",
+            "Latvia",
+            "New_Zealand",
+            "Singapore",
+            "Switzerland",
+            "Vietnam",
+            "Austria",
+            "Colombia",
+            "Finland",
+            "Iceland",
+            "Lithuania",
+            "North_Macedonia",
+            "Slovakia",
+            "Taiwan",
+            "Belgium",
+            "Costa_Rica",
+            "France",
+            "Indonesia",
+            "Luxembourg",
+            "Norway",
+            "Slovenia",
+            "Thailand",
+            "Bosnia_And_Herzegovina",
+            "Croatia",
+            "Georgia",
+            "Ireland",
+            "Malaysia",
+            "Poland",
+            "South_Africa",
+            "Turkey",
+            "Brazil",
+            "Cyprus",
+            "Germany",
+            "Israel",
+            "Mexico",
+            "Portugal",
+            "South_Korea",
+            "Ukraine",
+        ]
+
 
 # Mock the nordvpn_command method to ensure that no actual nordvpn shell
 # command is called during tests in case of a mistake while development.
@@ -137,3 +207,12 @@ class UtilsTestsLoggedOut(unittest.TestCase):
         ):
             with self.assertRaises(utils.NotLoggedInError):
                 utils.get_status()
+
+    @mock.patch(
+        "src.nordvpn.commands.nordvpn_countries",
+        mock_commands.get_mock_nordvpn_countries(logged_in=False),
+    )
+    def test_get_countries(self):
+        """Test the utils.get_countries function."""
+        with self.assertRaises(utils.NotLoggedInError):
+            utils.get_countries()
