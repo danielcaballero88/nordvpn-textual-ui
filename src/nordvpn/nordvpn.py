@@ -5,7 +5,7 @@ from .commands.mock_commands import MockCommands
 from .exceptions import NotLoggedInError, NotLoggedOutError
 
 
-class NordvpnBase:
+class Nordvpn:
     """Class to interact with the nordvpn cli and keep track of status."""
 
     def __init__(self, test=False):
@@ -14,6 +14,34 @@ class NordvpnBase:
             self.cmds = MockCommands()
         else:
             self.cmds = NordvpnCommands()
+        self.logged_in = self.get_logged_in()
+        self.connected = self.get_connected()
+
+    def get_logged_in(self) -> bool:
+        try:
+            self.check_account()
+        except Exception as exc:
+            print(exc)
+            return False
+        else:
+            return True
+
+    def set_logged_in(self, val: bool) -> bool:
+        self.logged_in = val
+        if self.test:
+            self.cmds.set_logged_in(val)
+
+    def get_connected(self) -> bool:
+        try:
+            status = self.get_status()
+            return status["Status"].lower() == "connected"
+        except NotLoggedInError:
+            return False
+
+    def set_connected(self, val: bool) -> bool:
+        self.connected = val
+        if self.test:
+            self.cmds.set_connected(val)
 
     def check_account(self) -> dict[str, str]:
         """Run nordvpn account.
@@ -59,24 +87,15 @@ class NordvpnBase:
 
         return result
 
-    def is_logged_in(self) -> bool:
-        try:
-            self.check_account()
-        except Exception as exc:
-            print(exc)
-            return False
-        else:
-            return True
-
     def login_required(self, func_name: str) -> None:
         """Check for logged in status."""
-        if not self.is_logged_in():
+        if not self.get_logged_in():
             msg = f"function {func_name} requires to be logged in."
             raise NotLoggedInError(msg)
 
     def logout_required(self, func_name: str) -> None:
         """Check for logged in status."""
-        if self.is_logged_in():
+        if self.get_logged_in():
             msg = f"function {func_name} requires to be logged out."
             raise NotLoggedOutError(msg)
 
