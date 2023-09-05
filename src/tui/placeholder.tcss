@@ -1,0 +1,23 @@
+StatusHeader {
+    border: heavy red;
+    layout: horizontal;
+    height: 100%;
+}
+
+LoginBox {
+  dock: left;
+  layout: horizontal;
+  width: 50%
+}
+
+ConnectBox {
+  dock: right;
+  layout: horizontal;
+  background: $boost;
+  width: 50%;
+  height: 3;
+}
+
+#connect-button {
+  dock: right;
+}
