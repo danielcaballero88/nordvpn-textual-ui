@@ -162,20 +162,15 @@ class MockCommands:
 
     def nordvpn_countries(self):
         return MockCompletedProcess(
+            # fmt: off
             stdout=(
                 b"\r-\r  \r\r-\r  \r"
-                b"Albania\t\t\tBulgaria\t\tCzech_Republic\t\tGreece\t\t\t"
-                b"Italy\t\t\tMoldova\t\t\tRomania\t\t\tSpain\t\t\tUnited_Kingdom\nArgentina"
-                b"\t\tCanada\t\t\tDenmark\t\t\tHong_Kong\t\tJapan\t\t\tNetherlands\t\t"
-                b"Serbia\t\t\tSweden\t\t\tUnited_States\nAustralia\t\tChile\t\t\tEstonia"
-                b"\t\t\tHungary\t\t\tLatvia\t\t\tNew_Zealand\t\tSingapore\t\tSwitzerland"
-                b"\t\tVietnam\nAustria\t\t\tColombia\t\tFinland\t\t\tIceland\t\t\tLithuania"
-                b"\t\tNorth_Macedonia\t\tSlovakia\t\tTaiwan\nBelgium\t\t\tCosta_Rica\t\t"
-                b"France\t\t\tIndonesia\t\tLuxembourg\t\tNorway\t\t\tSlovenia\t\tThailand\n"
-                b"Bosnia_And_Herzegovina\tCroatia\t\t\tGeorgia\t\t\tIreland\t\t\tMalaysia\t"
-                b"\tPoland\t\t\tSouth_Africa\t\tTurkey\nBrazil\t\t\tCyprus\t\t\tGermany\t\t"
-                b"\tIsrael\t\t\tMexico\t\t\tPortugal\t\tSouth_Korea\t\tUkraine\n"
+                b"Mock_Country_1\t\t"
+                b"Mock_Country_2\t\t"
+                b"Mock_Country_3\t\t\t"
+                b"Mock_Country_4\n"
             ),
+            # fmt: on
             returncode=0,
         )
 
