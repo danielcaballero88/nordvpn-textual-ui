@@ -1,5 +1,6 @@
 from textual.app import App, ComposeResult
 from textual.containers import Grid, ScrollableContainer
+from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Label, Static
 
@@ -23,8 +24,31 @@ class QuitScreen(Screen):
 
 
 class LoginBox(Static):
+    def __init__(self, logged_in: bool, *args, **kwargs):
+        self.logged_in = reactive(logged_in)
+        super().__init__(*args, **kwargs)
+
     def compose(self) -> ComposeResult:
-        yield Button("Log in", id="login-button", variant="success")
+        if self.logged_in:
+            msg = "Log out"
+            variant = "warning"
+        else:
+            msg = "Log in"
+            variant = "success"
+        yield Button(msg, id="login-button", variant=variant)
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        button = event.button
+        if button.id == "login-button":
+            if self.logged_in:
+                self.logged_in = False
+                button.label = "Log in"
+                button.variant = "success"
+            else:
+                self.logged_in = True
+                button.label = "Log out"
+                button.variant = "warning"
 
 
 class ConnectBox(Static):
@@ -34,7 +58,7 @@ class ConnectBox(Static):
 
 class StatusHeader(Static):
     def compose(self) -> ComposeResult:
-        yield LoginBox(classes="button-box")
+        yield LoginBox(False, classes="button-box")
         yield ConnectBox(classes="button-box")
 
 
