@@ -4,6 +4,10 @@ from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import Button, Footer, Header, Label, Static
 
+from src.nordvpn.nordvpn import Nordvpn
+
+nordvpn = Nordvpn(test=True)
+
 
 class QuitScreen(Screen):
     """Screen with a dialog to quit."""
@@ -24,42 +28,70 @@ class QuitScreen(Screen):
 
 
 class LoginBox(Static):
-    def __init__(self, logged_in: bool, *args, **kwargs):
-        self.logged_in = reactive(logged_in)
-        super().__init__(*args, **kwargs)
+    logged_in = reactive(False)
 
     def compose(self) -> ComposeResult:
+        yield Button("Login Button", id="login-button", variant="default")
+
+    def watch_logged_in(self, val):
+        print("PRINT: ", "LoginBox", "watch_logged_in", val)
+        button = self.query_one(Button)
         if self.logged_in:
-            msg = "Log out"
-            variant = "warning"
+            button.label = f"Logged in: {nordvpn.check_account()['email']}"
+            button.variant = "success"
         else:
-            msg = "Log in"
-            variant = "success"
-        yield Button(msg, id="login-button", variant=variant)
+            button.label = "Logged out"
+            button.variant = "warning"
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
-        button = event.button
-        if button.id == "login-button":
-            if self.logged_in:
-                self.logged_in = False
-                button.label = "Log in"
-                button.variant = "success"
-            else:
-                self.logged_in = True
-                button.label = "Log out"
-                button.variant = "warning"
+        print("PRINT: ", "LoginBox", "Button pressed: ", event.button)
 
 
 class ConnectBox(Static):
+    logged_in = reactive(False)
+    connected = reactive(False)
+
     def compose(self) -> ComposeResult:
-        yield Button("Connect", id="connect-button", variant="success")
+        yield Button(
+            "Connect Button", id="connect-button", variant="default", disabled=True
+        )
+
+    def watch_logged_in(self, val):
+        print("PRINT: ", "ConnectBox", "watch_logged_in", val)
+        button = self.query_one(Button)
+        button.disabled = not self.logged_in
+
+        if self.connected:
+            button.label = f"Connected: {nordvpn.get_status()['country']}"
+            button.variant = "success"
+        else:
+            button.label = "Disconnected"
+            button.variant = "warning"
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        print("PRINT: ", "ConnectBox", "Button pressed: ", event.button)
 
 
 class StatusHeader(Static):
+    logged_in = reactive(False)
+
+    def on_mount(self) -> None:
+        self.logged_in = self.app.logged_in
+
+    def watch_logged_in(self, val):
+        print("PRINT: ", "StatusHeader", "watch_logged_in", val)
+        self.query_one(LoginBox).logged_in = val
+        self.query_one(ConnectBox).logged_in = val
+
     def compose(self) -> ComposeResult:
-        yield LoginBox(False, classes="button-box")
+        yield LoginBox(classes="button-box")
         yield ConnectBox(classes="button-box")
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        print("PRINT: ", "StatusHeader", "Button pressed: ", event.button)
 
 
 class NordvpnTUI(App):
@@ -69,6 +101,12 @@ class NordvpnTUI(App):
         ("q", "request_quit", "Quit"),
     ]
 
+    logged_in = reactive(nordvpn.logged_in)
+
+    def watch_logged_in(self, val):
+        print("PRINT: ", "NordvpnTUI", "watch_logged_in", val)
+        self.query_one(StatusHeader).logged_in = val
+
     def compose(self) -> ComposeResult:
         yield Header()
         yield Footer()
@@ -76,6 +114,23 @@ class NordvpnTUI(App):
 
     def action_request_quit(self) -> None:
         self.push_screen(QuitScreen())
+
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Event handler called when a button is pressed."""
+        print("PRINT: ", "NordvpnTUI", "Button pressed: ", event.button)
+        if event.button.id == "login-button":
+            if not self.logged_in:
+                self.log_in()
+            else:
+                self.log_out()
+
+    def log_in(self):
+        nordvpn.set_logged_in(True)
+        self.logged_in = True
+
+    def log_out(self):
+        nordvpn.set_logged_in(False)
+        self.logged_in = False
 
 
 if __name__ == "__main__":
