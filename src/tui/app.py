@@ -1,69 +1,71 @@
-from textual.app import App, ComposeResult
-from textual.containers import Container, Grid, ScrollableContainer
-from textual.reactive import reactive
-from textual.screen import Screen
-from textual.widgets import Button, Footer, Header, Label, OptionList, Pretty, Static
+from textual import app as ta
+from textual import containers as tc
+from textual import reactive as tr
+from textual import screen as ts
+from textual import widgets as tw
 
 from src.nordvpn.nordvpn import Nordvpn
 
 nordvpn = Nordvpn(test=True)
 
 
-class QuitScreen(Screen):
+class QuitScreen(ts.Screen):
     """Screen with a dialog to quit."""
 
-    def compose(self) -> ComposeResult:
-        yield Grid(
-            Label(
+    def compose(self) -> ta.ComposeResult:
+        yield tc.Grid(
+            tw.Label(
                 "Are you sure you want to quit?",
                 id="quit-question",
                 classes="confirmation-question",
             ),
-            Button("Quit", variant="error", id="button-quit-confirm"),
-            Button("Cancel", variant="primary", id="button-quit-cancel"),
+            tw.Button("Quit", variant="error", id="button-quit-confirm"),
+            tw.Button("Cancel", variant="primary", id="button-quit-cancel"),
             classes="confirmation-dialog",
             id="quit-dialog",
         )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         if event.button.id == "button-quit-confirm":
             self.app.exit()
         else:
             self.app.pop_screen()
 
 
-class LogoutScreen(Screen):
+class LogoutScreen(ts.Screen):
     """Screen with a dialog to logout."""
 
-    def compose(self) -> ComposeResult:
-        yield Grid(
-            Label(
+    def compose(self) -> ta.ComposeResult:
+        yield tc.Grid(
+            tw.Label(
                 "Are you sure you want to log out?",
                 id="logout-question",
                 classes="confirmation-question",
             ),
-            Button("Log out", variant="error", id="button-logout-confirm"),
-            Button("Cancel", variant="primary", id="button-logout-cancel"),
+            tw.Button("Log out", variant="error", id="button-logout-confirm"),
+            tw.Button("Cancel", variant="primary", id="button-logout-cancel"),
             classes="confirmation-dialog",
             id="logout-dialog",
         )
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         print("PRINT: ", "LogoutScreen", "Button pressed: ", event.button)
         self.app.pop_screen()
         if event.button.id == "button-logout-confirm":
             self.app.log_out()
 
 
-class LoginBox(Static):
-    logged_in = reactive(False)
+class LoginBox(tw.Static):
+    """Container for the log in button."""
 
-    def compose(self) -> ComposeResult:
-        yield Button("Login Button", id="login-button", variant="default")
+    logged_in = tr.reactive(False)
+
+    def compose(self) -> ta.ComposeResult:
+        yield tw.Button("Login Button", id="login-button", variant="default")
 
     def watch_logged_in(self, val):
         print("PRINT: ", "LoginBox", "watch_logged_in", val)
-        button = self.query_one(Button)
+        button = self.query_one(tw.Button)
         if self.logged_in:
             button.label = f"Logged in: {nordvpn.check_account()['email']}"
             button.variant = "success"
@@ -71,23 +73,25 @@ class LoginBox(Static):
             button.label = "Logged out"
             button.variant = "warning"
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
         print("PRINT: ", "LoginBox", "Button pressed: ", event.button)
 
 
-class ConnectBox(Static):
-    logged_in = reactive(False)
-    connected = reactive(False)
+class ConnectBox(tw.Static):
+    """Container for the connect button."""
 
-    def compose(self) -> ComposeResult:
-        yield Button(
+    logged_in = tr.reactive(False)
+    connected = tr.reactive(False)
+
+    def compose(self) -> ta.ComposeResult:
+        yield tw.Button(
             "Connect Button", id="connect-button", variant="default", disabled=True
         )
 
     def watch_logged_in(self, val):
         print("PRINT: ", "ConnectBox", "watch_logged_in", val)
-        button = self.query_one(Button)
+        button = self.query_one(tw.Button)
         button.disabled = not self.logged_in
 
         if self.connected:
@@ -97,13 +101,15 @@ class ConnectBox(Static):
             button.label = "Disconnected"
             button.variant = "warning"
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
         print("PRINT: ", "ConnectBox", "Button pressed: ", event.button)
 
 
-class StatusHeader(Static):
-    logged_in = reactive(False)
+class StatusHeader(tw.Static):
+    """Widget for the top bar to log in/out and connect/disconnect."""
+
+    logged_in = tr.reactive(False)
 
     def on_mount(self) -> None:
         self.logged_in = self.app.logged_in
@@ -113,18 +119,20 @@ class StatusHeader(Static):
         self.query_one(LoginBox).logged_in = val
         self.query_one(ConnectBox).logged_in = val
 
-    def compose(self) -> ComposeResult:
+    def compose(self) -> ta.ComposeResult:
         yield LoginBox(classes="button-box")
         yield ConnectBox(classes="button-box")
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
         print("PRINT: ", "StatusHeader", "Button pressed: ", event.button)
 
 
-class CountriesList(Static):
-    logged_in = reactive(False)
-    countries = reactive([])
+class CountriesList(tw.Static):
+    """Widget for the list of countries to connect to."""
+
+    logged_in = tr.reactive(False)
+    countries = tr.reactive([])
 
     def on_mount(self) -> None:
         self.logged_in = self.app.logged_in
@@ -139,40 +147,42 @@ class CountriesList(Static):
     def watch_countries(self, val):
         print("PRINT: ", "CountriesList", "watch_countries", val)
         try:
-            for widget in self.query(OptionList):  # pylint: disable=not-an-iterable
+            for widget in self.query(tw.OptionList):  # pylint: disable=not-an-iterable
                 widget.remove()
         except Exception as exc:
             print("PRINT: ", "CountriesList", "watch_countries", exc)
-        self.mount(OptionList(*self.countries))
+        self.mount(tw.OptionList(*self.countries))
 
-    def compose(self) -> ComposeResult:
-        yield OptionList(*self.countries)
+    def compose(self) -> ta.ComposeResult:
+        yield tw.OptionList(*self.countries)
 
 
-class NordvpnTUI(App):
+class NordvpnTUI(ta.App):
+    """Main textual app."""
+
     CSS_PATH = "app.tcss"
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "request_quit", "Quit"),
     ]
 
-    logged_in = reactive(nordvpn.logged_in)
-    selected_country = reactive("none")
+    logged_in = tr.reactive(nordvpn.logged_in)
+    selected_country = tr.reactive("none")
 
     def watch_logged_in(self, val):
         print("PRINT: ", "NordvpnTUI", "watch_logged_in", val)
         self.query_one(StatusHeader).logged_in = val
         self.query_one(CountriesList).logged_in = val
 
-    def compose(self) -> ComposeResult:
-        yield Header()
-        yield Footer()
-        yield Container(StatusHeader(), CountriesList())
+    def compose(self) -> ta.ComposeResult:
+        yield tw.Header()
+        yield tw.Footer()
+        yield tc.Container(StatusHeader(), CountriesList())
 
     def action_request_quit(self) -> None:
         self.push_screen(QuitScreen(classes="confirm-decision-screen"))
 
-    def on_button_pressed(self, event: Button.Pressed) -> None:
+    def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
         print("PRINT: ", "NordvpnTUI", "Button pressed: ", event.button)
         if event.button.id == "login-button":
