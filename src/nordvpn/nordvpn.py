@@ -1,7 +1,7 @@
 import re
 
 from .commands.commands import NordvpnCommands
-from .commands.mock_commands import MockCommands
+from .commands.mock_commands import MockNordvpnCommands
 from .exceptions import NotLoggedInError, NotLoggedOutError
 
 
@@ -11,11 +11,10 @@ class Nordvpn:
     def __init__(self, test=False):
         self.test = test
         if test:
-            self.cmds = MockCommands()
+            self.cmds = MockNordvpnCommands()
         else:
+            raise NotImplementedError("Only allow this after completing the app.")
             self.cmds = NordvpnCommands()
-        self.logged_in = self.get_logged_in()
-        self.connected = self.get_connected()
 
     def get_logged_in(self) -> bool:
         try:
@@ -26,22 +25,12 @@ class Nordvpn:
         else:
             return True
 
-    def set_logged_in(self, val: bool) -> bool:
-        self.logged_in = val
-        if self.test:
-            self.cmds.set_logged_in(val)
-
     def get_connected(self) -> bool:
         try:
             status = self.get_status()
             return status["Status"].lower() == "connected"
         except NotLoggedInError:
             return False
-
-    def set_connected(self, val: bool) -> bool:
-        self.connected = val
-        if self.test:
-            self.cmds.set_connected(val)
 
     def check_account(self) -> dict[str, str]:
         """Run nordvpn account.
