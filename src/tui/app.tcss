@@ -2,7 +2,7 @@ StatusHeader {
     border: heavy red;
     layout: horizontal;
     height: 100%;
-    height: 5;
+    height: 8;
 }
 
 StatusHeader .button-box {

@@ -4,11 +4,12 @@ from textual import reactive as tr
 from textual import screen as ts
 from textual import widgets as tw
 
+from src.nordvpn.exceptions import NotLoggedInError
 from src.nordvpn.nordvpn import Nordvpn
 
 nordvpn = Nordvpn(test=True)
 nordvpn.run_login()
-nordvpn.connect_to_location("Mock_Country_2")
+# nordvpn.connect_to_location("Mock_Country_2")
 
 
 class QuitScreen(ts.Screen):
@@ -30,7 +31,7 @@ class QuitScreen(ts.Screen):
     def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         if event.button.id == "button-quit-confirm":
             self.app.exit()
-        else:
+        else:  # button-quit-cancel
             self.app.pop_screen()
 
 
@@ -52,9 +53,8 @@ class LogoutScreen(ts.Screen):
 
     def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         print("PRINT: ", "LogoutScreen", "Button pressed: ", event.button)
-        self.app.pop_screen()
-        if event.button.id == "button-logout-confirm":
-            self.app.log_out()
+        if event.button.id == "button-logout-cancel":
+            self.app.pop_screen()
 
 
 class LoginBox(tw.Static):
@@ -63,17 +63,37 @@ class LoginBox(tw.Static):
     logged_in = tr.reactive(False)
 
     def compose(self) -> ta.ComposeResult:
-        yield tw.Button("Login Button", id="button-login", variant="default")
+        yield tc.Vertical(
+            tw.Button("Log in", id="button-login", variant="success"),
+            tw.Button("Log out", id="button-logout", variant="warning"),
+        )
 
     def watch_logged_in(self, val):
         print("PRINT: ", "LoginBox", "watch_logged_in", val)
-        button = self.query_one(tw.Button)
+        self.update_button_login()
+        self.update_button_logout()
+
+    def update_button_login(self) -> None:
+        button = self.query_one("#button-login")
         if self.logged_in:
-            button.label = f"Logged in: {nordvpn.check_account()['email']}"
+            button.label = f"Logged in as {nordvpn.check_account()['email']}"
             button.variant = "success"
+            button.disabled = True
+        else:
+            button.label = "Log in"
+            button.variant = "success"
+            button.disabled = False
+
+    def update_button_logout(self) -> None:
+        button = self.query_one("#button-logout")
+        if self.logged_in:
+            button.label = "Log out"
+            button.variant = "warning"
+            button.disabled = False
         else:
             button.label = "Logged out"
-            button.variant = "warning"
+            button.variant = "default"
+            button.disabled = True
 
     def on_button_pressed(self, event: tw.Button.Pressed) -> None:
         """Event handler called when a button is pressed."""
@@ -88,33 +108,74 @@ class ConnectBox(tw.Static):
     selected_country = tr.reactive(None)
 
     def compose(self) -> ta.ComposeResult:
-        yield tw.Button(
-            "Connect Button", id="button-connect", variant="default", disabled=True
+        yield tc.Vertical(
+            tw.Button("Connect", id="button-connect", variant="success", disabled=True),
+            tw.Button(
+                "Disconnect", id="button-disconnect", variant="warning", disabled=True
+            ),
         )
 
     def watch_logged_in(self, val):
         print("PRINT: ", "ConnectBox", "watch_logged_in", val)
-        self.update_disabled_status()
+        self.update_buttons()
 
     def watch_connected(self, val):
         print("PRINT: ", "ConnectBox", "watch_connected", val)
-        button = self.query_one(tw.Button)
-        if self.connected:
-            button.label = f"Connected: {nordvpn.get_status()['Country']}"
-            button.variant = "success"
-        else:
-            button.label = "Disconnected"
-            button.variant = "warning"
+        self.update_buttons()
 
     def watch_selected_country(self, val):
         print("PRINT: ", "ConnectBox", "watch_selected_country", val)
-        self.update_disabled_status()
+        self.update_buttons()
 
-    def update_disabled_status(self):
-        button = self.query_one(tw.Button)
-        if self.logged_in and self.selected_country is not None:
+    def update_buttons(self):
+        print(
+            "PRINT: ",
+            "ConnectBox",
+            "update_buttons",
+            self.logged_in,
+            self.connected,
+            self.selected_country,
+        )
+        self.update_button_connect()
+        self.update_button_disconnect()
+
+    def update_button_connect(self) -> None:
+        button = self.query_one("#button-connect")
+        if not self.logged_in:
+            print("######### 1 #########")
+            button.label = "Connect"
+            button.variant = "default"
+            button.disabled = True
+            return
+
+        if self.connected:
+            print("######### 2 #########")
+            button.label = f"Connected: {nordvpn.get_status()['Country']}"
+            button.variant = "success"
+            button.disabled = True
+        elif self.selected_country is not None:
+            print("######### 3 #########")
+            button.label = f"Connect to {self.selected_country}"
+            button.variant = "warning"
             button.disabled = False
         else:
+            print("######### 4 #########")
+            button.label = "Connect to ..."
+            button.variant = "warning"
+            button.disabled = True
+
+    def update_button_disconnect(self) -> None:
+        button = self.query_one("#button-disconnect")
+        if not self.logged_in:
+            button.variant = "default"
+            button.disabled = True
+            return
+
+        if self.connected:
+            button.variant = "warning"
+            button.disabled = False
+        else:
+            button.variant = "default"
             button.disabled = True
 
     def on_button_pressed(self, event: tw.Button.Pressed) -> None:
@@ -197,6 +258,7 @@ class CountriesList(tw.Static):
         yield tw.OptionList(*self.countries)
 
     def highlight_country(self, name):
+        k = 0
         for k, val in enumerate(self.countries):
             if val == name:
                 break
@@ -223,7 +285,10 @@ class NordvpnTUI(ta.App):
 
     def watch_connected(self, val):
         print("PRINT: ", "NordvpnTUI", "watch_connected", val)
-        connected_country = nordvpn.get_status()["Country"]
+        try:
+            connected_country = nordvpn.get_status()["Country"]
+        except NotLoggedInError:
+            connected_country = None
         self.query_one(StatusHeader).connected = val
         self.query_one(CountriesList).connected_country = connected_country
 
@@ -243,17 +308,17 @@ class NordvpnTUI(ta.App):
         """Event handler called when a button is pressed."""
         print("PRINT: ", "NordvpnTUI", "Button pressed: ", event.button)
         if event.button.id == "button-login":
-            if not self.logged_in:
-                self.log_in()
-            else:
-                self.push_screen(LogoutScreen(classes="confirm-decision-screen"))
+            self.log_in()
+        elif event.button.id == "button-logout":
+            self.push_screen(LogoutScreen(classes="confirm-decision-screen"))
         elif event.button.id == "button-logout-confirm":
+            self.pop_screen()
+            self.disconnect()
             self.log_out()
         elif event.button.id == "button-connect":
-            if not self.connected:
-                print("PRINT: ", "NordvpnTUI", "connecting to: ", self.selected_country)
-            else:  # connected
-                ...
+            self.connect()
+        elif event.button.id == "button-disconnect":
+            self.disconnect()
 
     def on_option_list_option_selected(self, event) -> None:
         print(
@@ -266,12 +331,24 @@ class NordvpnTUI(ta.App):
         self.selected_country = event.option.prompt
 
     def log_in(self):
+        print("PRINT: ", "NordvpnTUI", "log_in")
         nordvpn.run_login()
         self.logged_in = True
 
     def log_out(self):
+        print("PRINT: ", "NordvpnTUI", "log_out")
         nordvpn.run_logout()
         self.logged_in = False
+
+    def connect(self):
+        print("PRINT: ", "NordvpnTUI", "connect")
+        nordvpn.connect_to_location(self.selected_country)
+        self.connected = True
+
+    def disconnect(self):
+        print("PRINT: ", "NordvpnTUI", "disconnect")
+        nordvpn.disconnect_from_nordvpn()
+        self.connected = False
 
     def on_click(self, event) -> None:
         print("PRINT: ", "NordvpnTUI", "click", event)
