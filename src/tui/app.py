@@ -13,7 +13,11 @@ from .nordvpn_instance import nordvpn
 class NordvpnTUI(ta.App):
     """Main textual app."""
 
-    CSS_PATH = "app.tcss"
+    CSS_PATH = [
+        "app.tcss",
+        "screens/screens.tcss",
+        "widgets/status_header/status_header.tcss",
+    ]
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
         ("q", "request_quit", "Quit"),
