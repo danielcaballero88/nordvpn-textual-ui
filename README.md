@@ -1,2 +1,5 @@
 # nordvpn-textual-cli
-NordVPN CLI for Linux
+
+NordVPN Textual User Interface for Linux, created using Textualize/textual as TUI framework.
+
+![TUI Sreenshot](screenshot.png)

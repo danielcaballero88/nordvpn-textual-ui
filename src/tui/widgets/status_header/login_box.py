@@ -25,7 +25,7 @@ class LoginBox(tw.Static):
     def update_button_login(self) -> None:
         button = self.query_one("#button-login")
         if self.logged_in:
-            button.label = f"Logged in as {nordvpn.check_account()['email']}"
+            button.label = f"{nordvpn.check_account()['email']}"
             button.variant = "success"
             button.disabled = True
         else:
