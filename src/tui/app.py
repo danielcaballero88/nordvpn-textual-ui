@@ -48,7 +48,7 @@ class NordvpnTUI(ta.App):
     def compose(self) -> ta.ComposeResult:
         yield tw.Header()
         yield tw.Footer()
-        yield tc.Container(w.StatusHeader(), w.CountriesList())
+        yield tc.VerticalScroll(w.StatusHeader(), w.CountriesList())
 
     def action_request_quit(self) -> None:
         self.push_screen(s.QuitScreen(classes="confirm-decision-screen"))
