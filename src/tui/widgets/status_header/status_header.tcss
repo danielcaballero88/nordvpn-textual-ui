@@ -1,0 +1,17 @@
+StatusHeader {
+  border: heavy red;
+  layout: horizontal;
+  height: 100%;
+  height: 8;
+}
+
+StatusHeader .button-box {
+  layout: horizontal;
+  background: $boost;
+  width: 50%;
+  align-horizontal: center;
+}
+
+StatusHeader .button-box Button {
+  width: 80%;
+}

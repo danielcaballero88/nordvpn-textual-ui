@@ -1,2 +1,2 @@
 [MESSAGES CONTROL]
-disable=no-else-return,missing-module-docstring
+disable=no-else-return,missing-module-docstring,not-callable,missing-function-docstring,broad-exception-caught
