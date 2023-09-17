@@ -13,7 +13,6 @@ class Nordvpn:
         if test:
             self.cmds = MockNordvpnCommands()
         else:
-            raise NotImplementedError("Only allow this after completing the app.")
             self.cmds = NordvpnCommands()
 
     def get_logged_in(self) -> bool:
